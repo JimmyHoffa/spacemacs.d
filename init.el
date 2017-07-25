@@ -27,7 +27,7 @@ values."
    ;; If non-nil layers with lazy install support are lazy installed.
    ;; List of additional paths where to look for configuration layers.
    ;; Paths must have a trailing slash (i.e. `~/.mycontribs/')
-   dotspacemacs-configuration-layer-path '()
+   dotspacemacs-configuration-layer-path '("~/.spacemacs.d/mylayers/")
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
@@ -56,27 +56,17 @@ values."
      ;; spell-checking
      (syntax-checking :variables syntax-checking-enable-tooltips t)
      version-control
-     java
      html
      javascript
-     haskell
-     purescript
-     csharp
+     rjsx
      erc
      python
-     clojure
-     scala
      themes-megapack
-     erlang
-     elixir
-     (elm :variables
-          elm-format-on-save t
-          elm-sort-imports-on-save t
-          elm-tags-on-save t)
-     floobits
-     go
-     fsharp
-     react
+;;     (elm :variables
+;;          elm-format-on-save t
+;;          elm-sort-imports-on-save t
+;;          elm-tags-on-save t)
+;;     myRjsx
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -368,6 +358,11 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
+
+  (push "~/.spacemacs.d/lisp/" load-path)
+  (require 'company-simple-complete)
+;;  (require 'jsfmt) This doesn't appear to work at all and I have no idea why.. Just puts bad line breaks all over code, never formats
+
   (defun server-ensure-safe-dir (dir) "Noop" t)
   (set-face-attribute 'default nil :height 120)
   (setq web-mode-markup-indent-offset 2
@@ -389,7 +384,7 @@ you should place your code here."
         haskell-process-type 'stack-ghci
         haskell-process-args-ghci "ghci"
         haskell-process-path-ghci "stack"
-        erc-nick "AnErcNickName"
+        erc-nick "JimmyHoffa"
         ;;        erc-port 6697
         erc-server "irc.freenode.net"
         ;;        omnisharp-server-executable-path "C:\home\sourcetree\omnisharp-roslyn\scripts\"
@@ -404,24 +399,20 @@ you should place your code here."
 
 
   (flycheck-add-mode 'javascript-eslint 'js2-mode)
-  (flycheck-add-mode 'javascript-eslint 'react-mode)
+  (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
+  ;; (flycheck-add-mode 'javascript-eslint 'react-mode)
   (defun my-js-jsx-hook ()
     (tern-mode)
     (add-to-list 'company-backends 'company-tern)
     )
 
-  (add-hook 'react-mode-hook 'my-js-jsx-hook)
+  (add-hook 'rjsx-mode-hook 'my-js-jsx-hook)
   (add-hook 'js2-mode-hook 'my-js-jsx-hook)
 
-
-
-
-
   ;;; COMPANY MODE FIX SECTION
   ;;; COMPANY MODE FIX SECTION
   ;;; COMPANY MODE FIX SECTION
 
-  (require 'company-simple-complete)
   (global-company-mode)
 
   ;;; Prevent suggestions from being triggered automatically. In particular,
@@ -441,23 +432,23 @@ you should place your code here."
   ;;; - https://emacs.stackexchange.com/q/27459/12534
 
   ;; <return> is for windowed Emacs; RET is for terminal Emacs
-  (dolist (key '("<return>" "RET"))
-    ;; Here we are using an advanced feature of define-key that lets
-    ;; us pass an "extended menu item" instead of an interactive
-    ;; function. Doing this allows RET to regain its usual
-    ;; functionality when the user has not explicitly interacted with
-    ;; Company.
-    (define-key company-active-map (kbd key)
-      `(menu-item nil company-complete
-                  :filter ,(lambda (cmd)
-                             (when (company-explicit-action-p)
-                               cmd)))))
-  (define-key company-active-map (kbd "TAB") #'company-complete-selection)
-  (define-key company-active-map (kbd "SPC") nil)
+  ;; (dolist (key '("<return>" "RET"))
+  ;;   ;; Here we are using an advanced feature of define-key that lets
+  ;;   ;; us pass an "extended menu item" instead of an interactive
+  ;;   ;; function. Doing this allows RET to regain its usual
+  ;;   ;; functionality when the user has not explicitly interacted with
+  ;;   ;; Company.
+  ;;   (define-key company-active-map (kbd key)
+  ;;     `(menu-item nil company-complete
+  ;;                 :filter ,(lambda (cmd)
+  ;;                            (when (company-explicit-action-p)
+  ;;                              cmd)))))
+  ;; (define-key company-active-map (kbd "TAB") #'company-complete-selection)
+  ;; (define-key company-active-map (kbd "SPC") nil)
 
-  ;; Company appears to override the above keymap based on company-auto-complete-chars.
-  ;; Turning it off ensures we have full control.
-  (setq company-auto-complete-chars nil)
+  ;; ;; Company appears to override the above keymap based on company-auto-complete-chars.
+  ;; ;; Turning it off ensures we have full control.
+  ;; (setq company-auto-complete-chars nil)
 
   ;;; COMPANY MODE FIX SECTION
   ;;; COMPANY MODE FIX SECTION
@@ -494,10 +485,9 @@ you should place your code here."
 
   (progn
     (spacemacs/set-leader-keys-for-major-mode 'fundamental-mode  "" 'helm-projectile-ag)
-    (spacemacs/set-leader-keys-for-major-mode 'web-mode  "=" 'run-jsfmt)
-    (spacemacs/set-leader-keys-for-major-mode 'react-mode  "=" 'run-jsfmt)
-    (spacemacs/set-leader-keys-for-major-mode 'js2-mode  "=" 'run-jsfmt)
     (spacemacs/set-leader-keys-for-major-mode 'elm-mode  "=" 'elm-mode-format-buffer)
+    (spacemacs/set-leader-keys-for-major-mode 'js2-mode  "=" 'run-jsfmt)
+    (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode  "=" 'run-jsfmt)
     (spacemacs/set-leader-keys-for-major-mode 'elm-mode  "hd" 'elm-oracle-doc-at-point))
 
   (spacemacs-completion/init-default-helm-config)
@@ -507,23 +497,3 @@ you should place your code here."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(helm-ag-base-command "pt -e -i --nocolor --nogroup")
- '(package-selected-packages
-   (quote
-    (gmail-message-mode ham-mode html-to-markdown flymd edit-server vmd-mode shut-up autothemer winum madhat2r-theme fuzzy flycheck-credo floobits wgrep smex swiper zonokai-theme zenburn-theme zen-and-art-theme yapfify xterm-color web-mode web-beautify underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme tronesque-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slim-mode shell-pop seti-theme scss-mode sass-mode reverse-theme railscasts-theme pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode psci purescript-mode psc-ide professional-theme planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme pastels-on-dark-theme orgit organic-green-theme org-projectile pcache org-present org-pomodoro alert log4e gntp org-download omtose-phellack-theme omnisharp oldlace-theme occidental-theme obsidian-theme ob-elixir org noflet noctilux-theme niflheim-theme naquadah-theme mustang-theme multi-term monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minimal-theme material-theme markdown-toc markdown-mode majapahit-theme magit-gitflow lush-theme livid-mode skewer-mode simple-httpd live-py-mode light-soap-theme less-css-mode json-mode json-snatcher json-reformat js2-refactor js2-mode js-doc jbeans-theme jazz-theme ir-black-theme intero inkpot-theme hy-mode htmlize hlint-refactor hindent heroku-theme hemisu-theme helm-pydoc helm-hoogle helm-gitignore helm-css-scss helm-company helm-c-yasnippet hc-zenburn-theme haskell-snippets haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme go-guru go-eldoc gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md gandalf-theme fsharp-mode flycheck-pos-tip flycheck-mix flycheck-haskell flycheck-elm flycheck flatui-theme flatland-theme firebelly-theme farmhouse-theme evil-magit magit magit-popup git-commit with-editor espresso-theme eshell-z eshell-prompt-extras esh-help erlang erc-yt erc-view-log erc-social-graph erc-image erc-hl-nicks ensime sbt-mode scala-mode emmet-mode elm-mode dracula-theme django-theme diff-hl darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme csharp-mode company-web web-completion-data company-tern dash-functional tern company-statistics company-quickhelp pos-tip company-go go-mode company-ghci company-ghc ghc haskell-mode company-emacs-eclim eclim company-cabal company-anaconda color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode cmm-mode clues-theme clojure-snippets clj-refactor inflections edn multiple-cursors paredit peg cider-eval-sexp-fu cider seq queue clojure-mode cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme auto-yasnippet yasnippet apropospriate-theme anti-zenburn-theme anaconda-mode pythonic ample-zen-theme ample-theme alect-themes alchemist company elixir-mode afternoon-theme ac-ispell auto-complete ws-butler window-numbering which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide ido-vertical-mode hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed dash aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async quelpa package-build spacemacs-theme)))
- '(projectile-generic-command "pt /nocolor /ignore node_modules* /ignore .svn /l .")
- '(projectile-globally-ignored-directories
-   (quote
-    (".idea" ".eunit" ".git" ".hg" ".fslckout" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "node_modules" "bower_components")))
- '(projectile-svn-command "find . -type f -print0"))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
