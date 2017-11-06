@@ -57,8 +57,9 @@ values."
      (syntax-checking :variables syntax-checking-enable-tooltips t)
      version-control
      html
-     javascript
-     rjsx
+     myjs
+     ;; javascript
+     ;; rjsx
      erc
      python
      themes-megapack
@@ -373,9 +374,9 @@ you should place your code here."
         web-mode-html-offset 2
         css-indent-offset 2
         js-indent-level 2
-        js2-basic-offset 2
-        js2-strict-missing-semi-warning nil
-        js2-show-parse-errors nil
+        js3-basic-offset 2
+        js3-strict-missing-semi-warning nil
+        js3-show-parse-errors nil
         javascript-enable-jsfmt 't
         solarized-high-contrast-mode-line nil
         solarized-distinct-fringe-background nil
@@ -398,16 +399,13 @@ you should place your code here."
         )
 
 
-  (flycheck-add-mode 'javascript-eslint 'js2-mode)
-  (flycheck-add-mode 'javascript-eslint 'rjsx-mode)
-  ;; (flycheck-add-mode 'javascript-eslint 'react-mode)
+  (flycheck-add-mode 'javascript-eslint 'rj3-mode)
   (defun my-js-jsx-hook ()
     (tern-mode)
     (add-to-list 'company-backends 'company-tern)
     )
 
-  (add-hook 'rjsx-mode-hook 'my-js-jsx-hook)
-  (add-hook 'js2-mode-hook 'my-js-jsx-hook)
+  (add-hook 'js3-mode-hook 'my-js-jsx-hook)
 
   ;;; COMPANY MODE FIX SECTION
   ;;; COMPANY MODE FIX SECTION
@@ -459,10 +457,10 @@ you should place your code here."
    ;;   '(eclim-eclipse-dirs '("C:/home/eclipse"))
    ;;   '(eclim-executable "C:/home/eclipse/eclim.bat")
    ;;   '(projectile-enable-caching nil)
-     '(projectile-generic-command "pt /nocolor /ignore node_modules* /ignore .svn /l .")
+     '(projectile-generic-command "pt /nocolor /ignore node_modules* /ignore .svn /l /i /g \"\" .")
    ;; '(projectile-generic-command "find . -path ./node_modules -prune -o -type f -printf \"%P \"")
    ;;'(projectile-svn-command "find . -path ./node_modules -prune -o -type f -printf \"%P\\n\" | grep -v '$/' | tr '\\n' '\\0'")
-   '(projectile-svn-command "find . -type f -print0")
+   '(projectile-svn-command projectile-generic-command);; "find . -type f -print0")
    '(projectile-globally-ignored-directories
      (quote
       (".idea" ".eunit" ".git" ".hg" ".fslckout" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "node_modules" "bower_components")))
@@ -486,8 +484,7 @@ you should place your code here."
   (progn
     (spacemacs/set-leader-keys-for-major-mode 'fundamental-mode  "" 'helm-projectile-ag)
     (spacemacs/set-leader-keys-for-major-mode 'elm-mode  "=" 'elm-mode-format-buffer)
-    (spacemacs/set-leader-keys-for-major-mode 'js2-mode  "=" 'run-jsfmt)
-    (spacemacs/set-leader-keys-for-major-mode 'rjsx-mode  "=" 'run-jsfmt)
+    (spacemacs/set-leader-keys-for-major-mode 'js3-mode  "=" 'run-jsfmt)
     (spacemacs/set-leader-keys-for-major-mode 'elm-mode  "hd" 'elm-oracle-doc-at-point))
 
   (spacemacs-completion/init-default-helm-config)
@@ -497,3 +494,24 @@ you should place your code here."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(helm-ag-base-command "pt -e -i --nocolor --nogroup")
+ '(package-selected-packages
+   (quote
+    (js3-mode zenburn-theme zen-and-art-theme yapfify xterm-color ws-butler winum which-key web-mode web-beautify volatile-highlights vmd-mode vi-tilde-fringe uuidgen use-package underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme toc-org tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spaceline powerline spacegray-theme soothe-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme smeargle slim-mode shell-pop seti-theme scss-mode sass-mode rjsx-mode reverse-theme restart-emacs rainbow-delimiters railscasts-theme pyvenv pytest pyenv-mode py-isort purple-haze-theme pug-mode professional-theme popwin planet-theme pip-requirements phoenix-dark-pink-theme phoenix-dark-mono-theme persp-mode pcre2el paradox spinner orgit organic-green-theme org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-plus-contrib org-download org-bullets open-junk-file omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme neotree naquadah-theme mustang-theme multi-term move-text monokai-theme monochrome-theme molokai-theme moe-theme mmm-mode minimal-theme material-theme markdown-toc majapahit-theme magit-gitflow madhat2r-theme macrostep lush-theme lorem-ipsum livid-mode skewer-mode simple-httpd live-py-mode linum-relative link-hint light-soap-theme less-css-mode json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc jbeans-theme jazz-theme ir-black-theme inkpot-theme info+ indent-guide hydra hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt heroku-theme hemisu-theme help-fns+ helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make projectile helm-gitignore request helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag hc-zenburn-theme haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme google-translate golden-ratio gnuplot gmail-message-mode ham-mode markdown-mode html-to-markdown gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md gandalf-theme fuzzy flymd flycheck-pos-tip flycheck pkg-info epl flx-ido flx flatui-theme flatland-theme fill-column-indicator farmhouse-theme fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit magit magit-popup git-commit with-editor evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight espresso-theme eshell-z eshell-prompt-extras esh-help erc-yt erc-view-log erc-social-graph erc-image erc-hl-nicks emmet-mode elisp-slime-nav edit-server dumb-jump dracula-theme django-theme diminish diff-hl define-word darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cython-mode cyberpunk-theme company-web web-completion-data company-tern dash-functional tern company-statistics company-quickhelp pos-tip company-anaconda company column-enforce-mode color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized coffee-mode clues-theme clean-aindent-mode cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme bind-map bind-key badwolf-theme auto-yasnippet yasnippet auto-highlight-symbol auto-compile packed apropospriate-theme anti-zenburn-theme anaconda-mode pythonic f s ample-zen-theme ample-theme alect-themes aggressive-indent afternoon-theme adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core async ac-ispell auto-complete popup solarized-theme dash)))
+ '(projectile-generic-command
+   "pt /nocolor /ignore node_modules* /ignore .svn /l /i /g \"\" .")
+ '(projectile-globally-ignored-directories
+   (quote
+    (".idea" ".eunit" ".git" ".hg" ".fslckout" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "node_modules" "bower_components")))
+ '(projectile-svn-command projectile-generic-command))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
