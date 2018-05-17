@@ -9,158 +9,66 @@
 ;;
 ;;; License: GPLv3
 
-(setq myjs-packages
-  '(
-    coffee-mode
-    company
-    (company-tern :toggle (configuration-layer/package-usedp 'company))
-    evil-matchit
-    flycheck
-    ggtags
-    helm-gtags
-    js-doc
-    js3-mode
-    json-mode
-    json-snatcher
-    (tern :toggle (spacemacs//tern-detect))
-    web-beautify
-    skewer-mode
-    livid-mode
-    ))
+(defconst myjs-packages '(web-mode tide prettier-js flycheck))
 
-(defun javascript/init-coffee-mode ()
-  (use-package coffee-mode
+(defun myjs/web-mode-hook ()
+  (tide-setup)
+  (flycheck-select-checker 'javascript-eslint)
+  (when (configuration-layer/package-usedp 'company)
+    (setq company-backends '(company-tide))
+    (company-mode-on))
+  )
+
+(defun myjs/init-web-mode ()
+  (use-package tide
     :defer t
-    :init
-    (progn
-      ;; indent to right position after `evil-open-below' and `evil-open-above'
-      (add-hook 'coffee-mode-hook '(lambda ()
-                                     (setq indent-line-function 'myjs/coffee-indent
-                                           evil-shift-width coffee-tab-width))))))
+    :init (progn
+            (add-to-list 'auto-mode-alist
+                         '("\\.js.?.?\\'" . web-mode))
+            (add-hook 'web-mode-hook 'myjs/web-mode-hook)
+            (defun myjs/jump-to-type-def ()
+              (interactive)
+              (tide-jump-to-definition t))
+            (defun myjs/browse-references ()
+              (interactive)
+              (ring-insert find-tag-marker-ring
+                           (point-marker))
+              (tide-references)
+              (switch-to-buffer-other-window "*tide-references*"))
+            (spacemacs/set-leader-keys-for-major-mode
+              'web-mode "r" 'myjs/browse-references "g"
+              'tide-jump-to-definition "-" 'tide-jump-back
+              "t" 'myjs/jump-to-type-def "h" 'tide-documentation-at-point
+              "R" 'tide-rename-symbol "s" 'tide-restart-server "e"  'spacemacs/goto-flycheck-error-list))))
 
-(defun myjs/post-init-company ()
-  (spacemacs|add-company-hook js3-mode))
-
-(defun myjs/init-company-tern ()
-  (use-package company-tern
-    :if (and (configuration-layer/package-usedp 'company)
-             (configuration-layer/package-usedp 'tern))
+(defun myjs/init-tide ()
+  (use-package tide
     :defer t
-    :init
-    (push 'company-tern company-backends-js3-mode)))
+    :config (progn
+              (defun myjs/view-prev-ref ()
+                (interactive)
+                (tide-next-reference-function -1)
+                (switch-to-buffer-other-window "*tide-references*"))
+              (defun myjs/view-next-ref ()
+                (interactive)
+                (tide-next-reference-function 1)
+                (switch-to-buffer-other-window "*tide-references*"))
+              (defun myjs/goto-ref-quit-window ()
+                (interactive)
+                (tide-goto-reference)
+                (switch-to-buffer-other-window "*tide-references*")
+                (quit-window))
+              (define-key tide-references-mode-map (kbd "<up>") 'myjs/view-prev-ref)
+              (define-key tide-references-mode-map (kbd "<down>") 'myjs/view-next-ref)
+              (define-key tide-references-mode-map (kbd "RET") 'myjs/goto-ref-quit-window))))
 
 (defun myjs/post-init-flycheck ()
-  (dolist (mode '(coffee-mode js3-mode json-mode))
-    (spacemacs/add-flycheck-hook mode)))
+  (defun flycheck-eslint-config-exists-p () (eq 0 0))
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
+  (spacemacs/add-flycheck-hook 'web-mode)
+  )
 
-(defun myjs/post-init-ggtags ()
-  (add-hook 'js3-mode-local-vars-hook #'spacemacs/ggtags-mode-enable))
-
-(defun myjs/post-init-helm-gtags ()
-  (spacemacs/helm-gtags-define-keys-for-mode 'js3-mode))
-
-(defun myjs/init-js-doc ()
-  (use-package js-doc
-    :defer t
-    :init
-    (spacemacs/js-doc-set-key-bindings 'js3-mode)))
-
-(defun myjs/init-js3-mode ()
-  (use-package js3-mode
-    :defer t
-    :init
-    (progn
-      (add-to-list 'auto-mode-alist '("\\.js\\'" . js3-mode)))
-    :config
-    (progn
-      ;; prefixes
-      (spacemacs/declare-prefix-for-mode 'js3-mode "mh" "documentation")
-      (spacemacs/declare-prefix-for-mode 'js3-mode "mg" "goto")
-      (spacemacs/declare-prefix-for-mode 'js3-mode "mr" "refactor")
-      (spacemacs/declare-prefix-for-mode 'js3-mode "mz" "folding")
-      ;; key bindings
-      (spacemacs/set-leader-keys-for-major-mode 'js3-mode
-        "w" 'js3-mode-toggle-warnings-and-errors
-        "zc" 'js3-mode-hide-element
-        "zo" 'js3-mode-show-element
-        "zr" 'js3-mode-show-all
-        "ze" 'js3-mode-toggle-element
-        "zF" 'js3-mode-toggle-hide-functions
-        "zC" 'js3-mode-toggle-hide-comments))))
-
-(defun myjs/post-init-evil-matchit ()
-  (add-hook `js3-mode `turn-on-evil-matchit-mode))
-
-(defun myjs/init-json-mode ()
-  (use-package json-mode
-    :defer t))
-
-(defun myjs/init-json-snatcher ()
-  (use-package json-snatcher
-    :defer t
-    :config
-    (spacemacs/set-leader-keys-for-major-mode 'json-mode
-      "hp" 'jsons-print-path)))
-
-(defun myjs/init-tern ()
-  (use-package tern
-    :defer t
-    :init
-    (add-hook 'js3-mode-hook 'tern-mode)
-    :config
-    (progn
-      (spacemacs|hide-lighter tern-mode)
-      (when javascript-disable-tern-port-files
-        (add-to-list 'tern-command "--no-port-file" 'append))
-      (spacemacs//set-tern-key-bindings 'js3-mode))))
-
-(defun myjs/init-web-beautify ()
-  (use-package web-beautify
-    :defer t
-    :init
-    (progn
-      (spacemacs/set-leader-keys-for-major-mode 'js3-mode
-        "=" 'web-beautify-js)
-      (spacemacs/set-leader-keys-for-major-mode 'json-mode
-        "=" 'web-beautify-js)
-      (spacemacs/set-leader-keys-for-major-mode 'web-mode
-        "=" 'web-beautify-html)
-      (spacemacs/set-leader-keys-for-major-mode 'css-mode
-        "=" 'web-beautify-css))))
-
-(defun myjs/init-skewer-mode ()
-  (use-package skewer-mode
-    :defer t
-    :init
-    (progn
-      (spacemacs/register-repl 'skewer-mode
-                               'spacemacs/skewer-start-repl
-                               "skewer")
-      (add-hook 'js3-mode-hook 'skewer-mode)
-      )
-    :config
-    (progn
-      (spacemacs|hide-lighter skewer-mode)
-      (spacemacs/declare-prefix-for-mode 'js3-mode "ms" "skewer")
-      (spacemacs/declare-prefix-for-mode 'js3-mode "me" "eval")
-      (spacemacs/set-leader-keys-for-major-mode 'js3-mode
-        "'" 'spacemacs/skewer-start-repl
-        "ee" 'skewer-eval-last-expression
-        "eE" 'skewer-eval-print-last-expression
-        "sb" 'skewer-load-buffer
-        "sB" 'spacemacs/skewer-load-buffer-and-focus
-        "si" 'spacemacs/skewer-start-repl
-        "sf" 'skewer-eval-defun
-        "sF" 'spacemacs/skewer-eval-defun-and-focus
-        "sr" 'spacemacs/skewer-eval-region
-        "sR" 'spacemacs/skewer-eval-region-and-focus
-        "ss" 'skewer-repl)
-      )))
-
-(defun myjs/init-livid-mode ()
-  (use-package livid-mode
-    :defer t
-    :init (spacemacs|add-toggle javascript-repl-live-evaluation
-            :mode livid-mode
-            :documentation "Live evaluation of JS buffer change."
-            :evil-leader-for-mode (js3-mode . "sa"))))
+(defun myjs/init-prettier-js ()
+  (dolist (mode '(web-mode json-mode tide-mode))
+    (spacemacs/set-leader-keys-for-major-mode
+      mode "=" 'prettier-js)))

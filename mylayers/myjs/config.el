@@ -1,4 +1,4 @@
-;;; config.el --- Javascript Layer configuration File for Spacemacs
+;;; config.el --- Typescript Layer Configuration File for Spacemacs
 ;;
 ;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
 ;;
@@ -9,11 +9,15 @@
 ;;
 ;;; License: GPLv3
 
-;; Variables
+(spacemacs|defvar-company-backends tide-mode)
 
-(spacemacs|defvar-company-backends js3-mode)
+(defvar typescript-fmt-on-save nil
+  "Run formatter on buffer save.")
 
-(spacemacs|define-jump-handlers js3-mode)
+(defvar typescript-fmt-tool 'tide
+  "The name of the tool to be used
+for TypeScript source code formatting.
+Currently avaliable 'tide (default)
+and 'typescript-formatter .")
 
-(defvar js3-disable-tern-port-files t
-  "Stops tern from creating tern port files.")
+(spacemacs|define-jump-handlers tide-mode)

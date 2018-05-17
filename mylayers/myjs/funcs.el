@@ -1,66 +1,66 @@
-;;; funcs.el --- Javascript Layer functions File for Spacemacs
+;;; funcs.el --- TypeScript  Layer functions File for Spacemacs
 ;;
 ;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
 ;;
-;; Author: Muneeb Shaikh <muneeb@reversehack.in>
+;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
 
-
-;; skewer
-
-(defun spacemacs/skewer-start-repl ()
-  "Attach a browser to Emacs and start a skewer REPL."
+(defun myjs/tsfmt-format-buffer ()
+  "Format buffer with tsfmt."
   (interactive)
-  (run-skewer)
-  (skewer-repl))
+  (if (executable-find "tsfmt")
+      (let*  ((tmpfile (make-temp-file "~fmt-tmp" nil ".ts"))
+              (coding-system-for-read 'utf-8)
+              (coding-system-for-write 'utf-8)
+              (outputbuf (get-buffer-create "*~fmt-tmp.ts*")))
+        (unwind-protect
+            (progn
+              (with-current-buffer outputbuf (erase-buffer))
+              (write-region nil nil tmpfile)
+              (if (zerop (apply 'call-process "tsfmt" nil outputbuf nil
+                                (list (format
+                                       "--baseDir='%s' --"
+                                       default-directory)
+                                      tmpfile)))
+                  (let ((p (point)))
+                    (save-excursion
+                      (with-current-buffer (current-buffer)
+                        (erase-buffer)
+                        (insert-buffer-substring outputbuf)))
+                    (goto-char p)
+                    (message "formatted.")
+                    (kill-buffer outputbuf))
+                (progn
+                  (message "Formatting failed!")
+                  (display-buffer outputbuf)))
+              (progn
+                (delete-file tmpfile)))))
+    (error "tsfmt not found. Run \"npm install -g typescript-formatter\"")))
 
-(defun spacemacs/skewer-load-buffer-and-focus ()
-  "Execute whole buffer in browser and switch to REPL in insert state."
+(defun myjs/format ()
+  "Call formatting tool specified in `typescript-fmt-tool'."
   (interactive)
-  (skewer-load-buffer)
-  (skewer-repl)
-  (evil-insert-state))
+  (cond
+   ((eq typescript-fmt-tool 'typescript-formatter)
+    (call-interactively 'myjs/tsfmt-format-buffer))
+   ((eq typescript-fmt-tool 'tide)
+    (call-interactively 'tide-format))
+   (t (error (concat "%s isn't valid typescript-fmt-tool value."
+                     " It should be 'tide or 'typescript-formatter."
+                     (symbol-name typescript-fmt-tool))))))
 
-(defun spacemacs/skewer-eval-defun-and-focus ()
-  "Execute function at point in browser and switch to REPL in insert state."
-  (interactive)
-  (skewer-eval-defun)
-  (skewer-repl)
-  (evil-insert-state))
+(defun myjs/fmt-before-save-hook ()
+  (add-hook 'before-save-hook 'myjs/format t t))
 
-(defun spacemacs/skewer-eval-region (beg end)
-  "Execute the region as JavaScript code in the attached browser."
-  (interactive "r")
-  (skewer-eval (buffer-substring beg end) #'skewer-post-minibuffer))
-
-(defun spacemacs/skewer-eval-region-and-focus (beg end)
-  "Execute the region in browser and swith to REPL in insert state."
-  (interactive "r")
-  (spacemacs/skewer-eval-region beg end)
-  (skewer-repl)
-  (evil-insert-state))
-
-
-;; tern
-
-(defun spacemacs//set-tern-key-bindings (mode)
-  "Set the key bindings for tern and the given MODE."
-  (add-to-list (intern (format "spacemacs-jump-handlers-%S" mode))
-            '(tern-find-definition :async t))
-  (spacemacs/set-leader-keys-for-major-mode mode
-    "rrV" 'tern-rename-variable
-    "hd" 'tern-get-docs
-    "gG" 'tern-find-definition-by-name
-    (kbd "C-g") 'tern-pop-find-definition
-    "ht" 'tern-get-type))
-
-(defun spacemacs//tern-detect ()
-  "Detect tern binary and warn if not found."
-  (let ((found (executable-find "tern")))
-    (unless found
-      (spacemacs-buffer/warning "tern binary not found!"))
-    found))
+(defun myjs/open-region-in-playground (start end)
+  "Open selected region in http://www.typescriptlang.org/Playground
+                 If nothing is selected - open the whole current buffer."
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list (point-min) (point-max))))
+  (browse-url (concat "http://www.typescriptlang.org/Playground#src="
+                      (url-hexify-string (buffer-substring-no-properties start end)))))

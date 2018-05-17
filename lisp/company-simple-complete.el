@@ -57,8 +57,8 @@
     (ad-set-arg 0 0)))
 
 (with-eval-after-load 'company
-  (define-key company-active-map [tab] 'company-simple-complete-next)
-  (define-key company-active-map (kbd "TAB") 'company-simple-complete-next)
+  (define-key company-active-map [tab] 'company-complete-selection)
+  (define-key company-active-map (kbd "TAB") 'company-complete-selection)
   (define-key company-active-map (kbd "<S-tab>") 'company-simple-complete-previous)
   (define-key company-active-map (kbd "RET") nil)
   (define-key company-active-map (kbd "<return>") nil)
