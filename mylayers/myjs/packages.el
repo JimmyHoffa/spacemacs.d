@@ -63,6 +63,23 @@
               (define-key tide-references-mode-map (kbd "RET") 'myjs/goto-ref-quit-window))))
 
 (defun myjs/post-init-flycheck ()
+  
+  ;; https://emacs.stackexchange.com/questions/14898/flycheck-with-eslint-doesnt-use-eslintrc
+  (use-package flycheck
+    :ensure t
+    :custom
+    (flycheck-display-errors-delay 0)
+    :config
+    (global-flycheck-mode)
+    ;; disable json-jsonlist checking for json files
+    (setq-default flycheck-disabled-checkers (append flycheck-disabled-checkers '(json-jsonlist)))
+    ;; disable jshint since we prefer eslint checking
+    (setq-default flycheck-disabled-checkers (append flycheck-disabled-checkers '(javascript-jshint)))
+    ;; use eslint with web-mode for jsx files
+    ;; Workaround for eslint loading slow
+    ;; https://github.com/flycheck/flycheck/issues/1129#issuecomment-319600923
+    (advice-add 'flycheck-eslint-config-exists-p :override (lambda() t)))
+  
   (defun flycheck-eslint-config-exists-p () (eq 0 0))
   (flycheck-add-mode 'javascript-eslint 'web-mode)
   (spacemacs/add-flycheck-hook 'web-mode)
