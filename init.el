@@ -56,7 +56,6 @@ values."
      ;;(syntax-checking :variables
      ;;  syntax-checking-enable-tooltips t)
      ;; version-control
-     ;; myjs
      multiple-cursors
      semantic
      ;; lsp
