@@ -47,7 +47,7 @@ values."
      ;; better-defaults
      emacs-lisp
      git
-     ;;(markdown :variables markdown-live-preview-engine 'vmd)
+     (markdown :variables markdown-live-preview-engine 'vmd)
      ;;org
      (shell :variables
        shell-default-height 30
@@ -59,8 +59,9 @@ values."
      ;; myjs
      multiple-cursors
      semantic
-     lsp
-     (typescript :variables typescript-backend 'lsp)
+     ;; lsp
+     (typescript ;; :variables typescript-backend 'lsp
+                 )
      ;; python
      ;; themes-megapack
      )
@@ -188,11 +189,11 @@ values."
 
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-;;   dotspacemacs-default-font '("Terminus"
-;;                               :size 13
-;;                               :weight normal
-;;                               :width normal
-;;                               :powerline-scale 1.1)
+   dotspacemacs-default-font '("Terminus"
+                              :size 13
+                              :weight normal
+                              :width normal
+                              :powerline-scale 1.1)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
 
@@ -466,9 +467,30 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
   (push "~/.spacemacs.d/lisp/" load-path)
+  (push "~/.spacemacs.d/lsp-ui/" load-path)
+  (push "~/.spacemacs.d/lsp/" load-path)
+  ;; (require 'lsp-ui)
+  ;; (require 'lsp)
+  ;; (add-hook 'lsp-mode-hook (lambda ()
+  ;;                            (lsp-ui-mode)))
+  ;;
+  ;; (defun my-before-save-hook ()
+  ;;   (cond
+  ;;    ((not (derived-mode-p 'markdown-mode)) (delete-trailing-whitespace))
+  ;;    ((derived-mode-p 'elm-mode) (elm-mode-format-buffer))
+  ;;   )
+  ;; )
+  ;; (add-hook 'before-save-hook 'my-before-save-hook)
+  ;; (add-hook 'markdown-mode-hook
+  ;;           (lambda ()
+  ;;             ((spacemacs/toggle-auto-fill-mode-on)
+  ;;              (spacemacs/toggle-fill-column-indicator-on))))
+  ;; (spacemacs/set-leader-keys-for-major-mode 'elm-mode "=" 'elm-mode-format-buffer)
+  ;; (spacemacs/set-leader-keys-for-major-mode 'elm-mode "hd" 'elm-oracle-doc-at-point)
   (require 'company-simple-complete)
   (require 'solarized-dark-theme)
-  (global-company-mode)
+  (require 'add-node-modules-path)
+
   (defun server-ensure-safe-dir (dir) "Noop" t)
 
   (set-face-attribute 'default nil :height 120)
@@ -481,6 +503,7 @@ you should place your code here."
         css-indent-offset 2
         js-indent-level 2
         js3-basic-offset 2
+        typescript-indent-level 2
         js3-strict-missing-semi-warning nil
         js3-show-parse-errors nil
         javascript-enable-jsfmt 't
@@ -502,35 +525,18 @@ you should place your code here."
         ;;projectile-indexing-method 'native
         ;;projectile-enable-caching 't
         yas-snippet-dirs '()
-        helm-ag-base-command "pt -e -i --nocolor --nogroup"
+        helm-ag-base-command "ag --ignore-case --nocolor --nogroup"
         projectile-globally-ignored-directories (quote (".idea" ".eunit" ".git" ".hg" ".fslckout" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "node_modules" "bower_components"))
         )
 
-  (defun my-before-save-hook ()
-    (cond
-     ((not (derived-mode-p 'markdown-mode)) (delete-trailing-whitespace))
-     ((derived-mode-p 'elm-mode) (elm-mode-format-buffer))
-    )
-  )
-
-  (add-hook 'before-save-hook 'my-before-save-hook)
   (add-hook 'find-file-hook 'spacemacs/toggle-auto-fill-mode-off)
   (add-hook 'find-file-hook 'spacemacs/toggle-line-numbers-on)
   (add-hook 'find-file-hook 'spacemacs/toggle-highlight-indentation-on)
+  (add-hook 'find-file-hook 'ido-mode)
 
-  (add-hook 'markdown-mode-hook
-            (lambda ()
-              ((spacemacs/toggle-auto-fill-mode-on)
-               (spacemacs/toggle-fill-column-indicator-on))))
-
-  (spacemacs/set-leader-keys-for-major-mode 'elm-mode "=" 'elm-mode-format-buffer)
-  (spacemacs/set-leader-keys-for-major-mode 'elm-mode "hd" 'elm-oracle-doc-at-point)
-
-  ;;(spacemacs-completion/init-default-helm-config)
+  (spacemacs-completion/init-default-helm-config)
   (spacemacs/toggle-highlight-current-line-globally-off)
   (spacemacs-completion/init-ido)
-  (global-set-key (kbd "C-x C-f") 'ido-find-file)
-  (global-set-key (kbd "C--") 'pop-tag-mark)
   (setq auto-mode-alist (rassq-delete-all 'js-mode auto-mode-alist))
   (setq auto-mode-alist (rassq-delete-all 'js2-mode auto-mode-alist))
   (setq auto-mode-alist (rassq-delete-all 'javascript-mode auto-mode-alist))
@@ -538,24 +544,29 @@ you should place your code here."
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . typescript-mode))
   (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
   (add-to-list 'auto-mode-alist '("\\.tjsx\\'" . typescript-mode))
-  )
 
-;; Do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (stickyfunc-enhance srefactor xterm-color web-mode vmd-mode tide typescript-mode smeargle shell-pop prettier-js powershell orgit org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download multi-term mmm-mode markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip flycheck evil-magit magit magit-popup git-commit ghub treepy graphql with-editor eshell-z eshell-prompt-extras esh-help company-statistics company-quickhelp pos-tip company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+  (add-hook 'typescript-mode-hook
+            (lambda ()
+              ;; (prettier-js-mode)
+              (setq typescript-backend 'tide)
+              (setq flycheck-checker 'javascript-eslint)
+              (when (projectile-project-root)
+                (add-to-list 'exec-path
+                             (concat
+                              (file-name-as-directory (projectile-project-root))
+                              (file-name-as-directory "node_modules")
+                              (file-name-as-directory ".bin")))
+                )
+              (add-node-modules-path)
+              (defun flycheck-eslint-config-exists-p () (eq 0 0))
+              (flycheck-add-mode 'javascript-eslint 'typescript-mode)))
+
+  (global-set-key (kbd "C-x C-f") 'ido-find-file)
+  (global-set-key (kbd "C--") 'pop-tag-mark)
+  (global-set-key (kbd "<C-M-down>") 'mc/mark-next-lines)
+  (global-flycheck-mode)
+  (global-company-mode)
+)
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
 This is an auto-generated function, do not modify its content directly, use
@@ -566,9 +577,12 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
    (quote
-    (yasnippet-snippets writeroom-mode visual-fill-column web-beautify symon string-inflection spaceline-all-the-icons solarized-theme password-generator overseer nameless magit-svn lsp-ui lsp-javascript-typescript livid-mode skewer-mode simple-httpd json-navigator hierarchy json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc helm-xref helm-purpose window-purpose imenu-list helm-git-grep gitignore-templates evil-lion evil-goggles evil-cleverparens paredit editorconfig doom-modeline eldoc-eval shrink-path all-the-icons memoize counsel-projectile counsel swiper ivy company-tern dash-functional tern company-lsp lsp-mode centered-cursor-mode font-lock+ dotenv-mode stickyfunc-enhance srefactor xterm-color web-mode vmd-mode tide typescript-mode smeargle shell-pop prettier-js powershell orgit org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download multi-term mmm-mode markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy flycheck-pos-tip flycheck evil-magit magit magit-popup git-commit ghub treepy graphql with-editor eshell-z eshell-prompt-extras esh-help company-statistics company-quickhelp pos-tip company auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (vmd-mode mmm-mode markdown-toc markdown-mode gh-md yasnippet-snippets xterm-color ws-butler writeroom-mode visual-fill-column winum web-beautify volatile-highlights vi-tilde-fringe uuidgen toc-org tide typescript-mode flycheck symon string-inflection stickyfunc-enhance srefactor spaceline-all-the-icons spaceline powerline solarized-theme smeargle shell-pop restart-emacs rainbow-delimiters prettier-js powershell popwin persp-mode password-generator paradox spinner overseer org-bullets open-junk-file neotree nameless multi-term move-text magit-svn magit-gitflow macrostep lorem-ipsum livid-mode skewer-mode simple-httpd link-hint json-navigator hierarchy json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc indent-guide hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-xref helm-themes helm-swoop helm-purpose window-purpose imenu-list helm-projectile helm-mode-manager helm-make helm-gitignore request helm-git-grep helm-flx helm-descbinds helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gitignore-templates gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link fuzzy flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-magit magit magit-popup git-commit ghub treepy graphql with-editor evil-lisp-state evil-lion evil-indent-plus evil-iedit-state iedit evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens smartparens paredit evil-args evil-anzu anzu eval-sexp-fu highlight eshell-z eshell-prompt-extras esh-help elisp-slime-nav editorconfig dumb-jump doom-modeline eldoc-eval shrink-path all-the-icons memoize f define-word counsel-projectile projectile counsel swiper ivy pkg-info epl company-tern s dash-functional tern dash company-statistics company-quickhelp pos-tip company column-enforce-mode clean-aindent-mode centered-cursor-mode auto-yasnippet yasnippet auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core ac-ispell auto-complete popup which-key use-package pcre2el org-plus-contrib hydra font-lock+ evil goto-chg undo-tree dotenv-mode diminish bind-map bind-key async)))
+ '(pdf-view-midnight-colors (quote ("#b2b2b2" . "#292b2e")))
+ '(tramp-syntax (quote default) nil (tramp)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
