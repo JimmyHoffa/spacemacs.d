@@ -41,8 +41,8 @@ values."
      (auto-completion :variables
       auto-completion-enable-help-tooltip t
       auto-completion-enable-snippets-in-popup nil
-      spacemacs-default-company-backends '(company-lsp company-dabbrev)
-      company-backends-typescript-mode '(company-lsp company-dabbrev)
+      spacemacs-default-company-backends '(company-tide company-dabbrev)
+      company-backends-typescript-mode '(company-tide company-dabbrev)
      )
      ;; better-defaults
      emacs-lisp
@@ -466,9 +466,8 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  (push "~/.spacemacs.d/lisp/" load-path)
-  (push "~/.spacemacs.d/lsp-ui/" load-path)
-  (push "~/.spacemacs.d/lsp/" load-path)
+  ;; (push "~/.spacemacs.d/lsp-ui/" load-path)
+  ;; (push "~/.spacemacs.d/lsp/" load-path)
   ;; (require 'lsp-ui)
   ;; (require 'lsp)
   ;; (add-hook 'lsp-mode-hook (lambda ()
@@ -487,6 +486,7 @@ you should place your code here."
   ;;              (spacemacs/toggle-fill-column-indicator-on))))
   ;; (spacemacs/set-leader-keys-for-major-mode 'elm-mode "=" 'elm-mode-format-buffer)
   ;; (spacemacs/set-leader-keys-for-major-mode 'elm-mode "hd" 'elm-oracle-doc-at-point)
+  (push "~/.spacemacs.d/lisp/" load-path)
   (require 'company-simple-complete)
   (require 'solarized-dark-theme)
   (require 'add-node-modules-path)
@@ -525,6 +525,7 @@ you should place your code here."
         ;;projectile-indexing-method 'native
         ;;projectile-enable-caching 't
         yas-snippet-dirs '()
+        ;;helm-ag-base-command "pt -e -i --nocolor --nogroup" ;; for windows
         helm-ag-base-command "ag --ignore-case --nocolor --nogroup"
         projectile-globally-ignored-directories (quote (".idea" ".eunit" ".git" ".hg" ".fslckout" ".bzr" "_darcs" ".tox" ".svn" ".stack-work" "node_modules" "bower_components"))
         )
