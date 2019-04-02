@@ -532,9 +532,8 @@ you should place your code here."
   (add-hook 'find-file-hook 'spacemacs/toggle-auto-fill-mode-off)
   (add-hook 'find-file-hook 'spacemacs/toggle-line-numbers-on)
   (add-hook 'find-file-hook 'spacemacs/toggle-highlight-indentation-on)
-  (add-hook 'find-file-hook 'ido-mode)
 
-  (spacemacs-completion/init-default-helm-config)
+  ;; (spacemacs-completion/init-default-helm-config)
   (spacemacs/toggle-highlight-current-line-globally-off)
   (spacemacs-completion/init-ido)
   (setq auto-mode-alist (rassq-delete-all 'js-mode auto-mode-alist))
@@ -543,7 +542,7 @@ you should place your code here."
   (add-to-list 'auto-mode-alist '("\\.js\\'" . typescript-mode))
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . typescript-mode))
   (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-mode))
-  (add-to-list 'auto-mode-alist '("\\.tjsx\\'" . typescript-mode))
+  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . typescript-mode))
 
   (add-hook 'typescript-mode-hook
             (lambda ()
@@ -563,9 +562,10 @@ you should place your code here."
 
   (global-set-key (kbd "C-x C-f") 'ido-find-file)
   (global-set-key (kbd "C--") 'pop-tag-mark)
-  (global-set-key (kbd "<C-M-down>") 'mc/mark-next-lines)
+  (global-set-key (kbd "C-M-<mouse-1>") 'mc/add-cursor-on-click)
   (global-flycheck-mode)
   (global-company-mode)
+  (ido-mode)
 )
 (defun dotspacemacs/emacs-custom-settings ()
   "Emacs custom settings.
